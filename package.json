@@ -1,0 +1,17 @@
+{
+  "name": "depth-yield-aggregator",
+  "version": "1.0.0",
+  "description": "yield aggregator for aaveV3 and compoundV3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "depth",
+  "license": "ISC",
+  "dependencies": {
+    "hardhat": "^2.14.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2"
+  }
+}
