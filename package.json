@@ -9,6 +9,7 @@
   "author": "depth",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.1.3",
     "hardhat": "^2.14.1"
   },
   "devDependencies": {
