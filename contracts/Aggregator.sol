@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
 import "@aave/core-v3/contracts/interfaces/IPool.sol";
 import "hardhat/console.sol";
+import "./IComet.sol";
 
 contract Aggregator is Ownable {
     // might have to use constant
@@ -20,11 +21,12 @@ contract Aggregator is Ownable {
 
     IERC20 immutable weth;
     IERC20 immutable aaveAweth;
+    IComet immutable comet;
 
     constructor() Ownable() {
         weth = IERC20(WETH_Address);
-        aaveAweth = IERC20(AAVE_A_WETH_MAINNET_ADDRESS);
-        // comet = IComet(COMPOUND_V3_PROXY_MAINNET_ADDRESS);
+        aaveAweth = IERC20(AaaveWETH_Address);
+        comet = IComet(CompoundV3ProxyAddress);
     }
 
     function deposit(
@@ -35,12 +37,15 @@ contract Aggregator is Ownable {
         require(_amount > 0);
 
         if (_compAPY > _aaveAPY) {
-            // Deposit into Compound
-            // require(_depositToCompound(_amount) == 0);
-            // Update location
+            _depositToCompound(_amount);
+
+            // // Update location track funds
+            // locationOfFunds = address(weth);
+
+            console.log("deposit comp");
         } else {
-            // Deposit into Aave
-            _deposit_to_aave(_amount);
+            _depositToAave(_amount);
+            console.log("deposit aave");
         }
     }
 
@@ -51,10 +56,15 @@ contract Aggregator is Ownable {
         return IPool(aaveV3PoolAddress);
     }
 
-    function _deposit_to_aave(uint256 weth_amount) private {
+    function _depositToAave(uint256 weth_amount) private {
         IPool aavePool = _getAavePool();
         weth.approve(address(aavePool), weth_amount);
         console.log(address(aavePool));
         aavePool.supply(address(weth), weth_amount, address(this), 0);
+    }
+
+    function _depositToCompound(uint256 weth_amount) private {
+        weth.approve(address(comet), weth_amount);
+        comet.supply(address(weth), weth_amount);
     }
 }

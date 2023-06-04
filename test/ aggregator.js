@@ -33,7 +33,7 @@ describe("Aggregator", function () {
       value: amount
     });
     const WETH_Balance = await WETH.balanceOf(owner.address)
-    expect(WETH_Balance.toString()).to.equal('20000000000000000000');
+    expect(WETH_Balance.toString()).to.equal(ethers.utils.parseEther('20'));
   });
 
   describe('APY rates', async () => {
@@ -53,7 +53,6 @@ describe("Aggregator", function () {
   });
 
   describe("deposits", async function () {
-    let amount = 10;
     // let amountInWei = utils.parseEther(amount.toString());
     let compAPY, aaveAPY;
     let result;
@@ -61,15 +60,21 @@ describe("Aggregator", function () {
       beforeEach(async function () {
         compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
         aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
+        await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
+        await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
+        await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+        let balance = await WETH.balanceOf(owner.address);
+        balance = ethers.utils.formatEther(balance);
+        console.log(`Owner's WETH Balance: ${balance}`);
       });
 
       it("deposit to aave", async function () {
 
-        await WETH.approve(aggregator.address, ethers.utils.parseEther('15'));
-        await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
-        tx = await aggregator._deposit_to_aave(ethers.utils.parseEther('10'));
-        console.log(tx);
-        console.log(WETH)
+
+
+        // tx = await aggregator._deposit_to_aave(ethers.utils.parseEther('10'));
+        // console.log(tx);
+        // console.log(WETH)
         
 
       });
