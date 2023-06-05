@@ -25,6 +25,7 @@ contract Aggregator is Ownable {
     IERC20 immutable weth;
     IERC20 immutable aaveAweth;
     IComet immutable comet;
+    IPool aavePool;
 
     event Deposit(address owner, uint256 amount, address depositTo);
     event Withdraw(address owner, uint256 amount, address withdrawFrom);
@@ -43,19 +44,17 @@ contract Aggregator is Ownable {
     ) external onlyOwner {
         require(_amount > 0);
 
+        if (depositAmount > 0) {
+            rebalance(_compAPY, _aaveAPY);
+        }
+
         weth.transferFrom(msg.sender, address(this), _amount);
         depositAmount = depositAmount + _amount;
 
         if (_compAPY > _aaveAPY) {
             _depositToCompound(_amount);
-
-            // // Update location track funds
-            // locationOfFunds = address(weth);
-
-            // console.log("deposit comp");
         } else {
             _depositToAave(_amount);
-            // console.log("deposit aave");
         }
 
         emit Deposit(msg.sender, _amount, locationOfFunds);
@@ -69,7 +68,7 @@ contract Aggregator is Ownable {
     }
 
     function _depositToAave(uint256 weth_amount) private {
-        IPool aavePool = _getAavePool();
+        aavePool = _getAavePool();
         weth.approve(address(aavePool), weth_amount);
         aavePool.supply(address(weth), weth_amount, address(this), 0);
         locationOfFunds = address(aavePool);
@@ -93,6 +92,7 @@ contract Aggregator is Ownable {
             amount = _withdrawFromAave();
             weth.transfer(msg.sender, amount);
             locationOfFunds = msg.sender;
+            // console.log(amount, "amount");
         }
 
         emit Withdraw(msg.sender, depositAmount, locationOfFunds);
@@ -106,10 +106,28 @@ contract Aggregator is Ownable {
     }
 
     function _withdrawFromAave() private returns (uint256) {
-        IPool aavePool = _getAavePool();
+        aavePool = _getAavePool();
         aaveAweth.approve(address(aavePool), type(uint).max);
         aavePool.withdraw(address(weth), type(uint).max, address(this));
         return weth.balanceOf(address(this));
+    }
+
+    function rebalance(uint256 _compAPY, uint256 _aaveAPY) public onlyOwner {
+        require(depositAmount > 0);
+        aavePool = _getAavePool();
+        if ((_compAPY > _aaveAPY) && (locationOfFunds != address(comet))) {
+            uint256 amount = _withdrawFromAave();
+            _depositToCompound(amount);
+            locationOfFunds = address(comet);
+        } else if (
+            (_aaveAPY > _compAPY) && (locationOfFunds != address(aavePool))
+        ) {
+            uint256 amount = _withdrawFromCompound();
+            _depositToAave(amount);
+            locationOfFunds = address(aavePool);
+        }
+
+        emit Rebalance(msg.sender, depositAmount, locationOfFunds);
     }
 
     // ===================== Getter Functions =====================

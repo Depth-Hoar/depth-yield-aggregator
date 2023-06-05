@@ -52,7 +52,8 @@ describe("Aggregator", function () {
 
   });
 
-  describe("deposits", async function () {
+  describe("Deposits", async function () {
+    let compAPY, aaveAPY
     let deposit;
     let depositEvent
 
@@ -60,7 +61,6 @@ describe("Aggregator", function () {
       compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
       aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
       await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
-      // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
       deposit = await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
     });
 
@@ -91,14 +91,14 @@ describe("Aggregator", function () {
         
   });
 
-  describe('withdraws', async () => {
+  describe('Withdraws', async () => {
+    let compAPY, aaveAPY
     let withdraw;
 
     beforeEach(async function () {
       compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
       aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
       await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
-      // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
       await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
       withdraw = await aggregator.withdraw();
     });
@@ -120,6 +120,34 @@ describe("Aggregator", function () {
 
     it('FAILS if another user attempts to withdraw', async () => {
       await expect(aggregator.connect(user).withdraw()).to.be.reverted;
+    });
+
+  });
+
+  describe('Rebalance', async () => {
+    let compAPY, aaveAPY
+    let rebalance;
+
+    beforeEach(async function () {
+      compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
+      aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
+      await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
+    });
+
+    it('emits rebalance event', async () => {
+      await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+      rebalance = await aggregator.rebalance(Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+      const receipt = await rebalance.wait();
+      if(receipt.events && receipt.events.length > 0){
+        rebalanceEvent = receipt.events.find(e => e.event === 'Rebalance');
+        expect(rebalanceEvent.event).to.equal('Rebalance');
+      } else {
+        console.log('No events were emitted');
+      }
+    });
+
+    it('FAILS if owner has no deposit amount', async () => {
+      await expect(aggregator.rebalance(Math.round(compAPY * 100), Math.round(aaveAPY * 100))).to.be.reverted;
     });
 
   });
