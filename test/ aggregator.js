@@ -27,13 +27,13 @@ describe("Aggregator", function () {
   });
 
   it("gets WETH", async function () {
-    const amount = ethers.utils.parseEther('50');
+    const amount = ethers.utils.parseEther('100');
     await owner.sendTransaction({
       to: WETH.address,
       value: amount
     });
     const WETH_Balance = await WETH.balanceOf(owner.address)
-    expect(WETH_Balance.toString()).to.equal(ethers.utils.parseEther('50'));
+    expect(WETH_Balance.toString()).to.equal(ethers.utils.parseEther('100'));
   });
 
   describe('APY rates', async () => {
@@ -53,8 +53,7 @@ describe("Aggregator", function () {
   });
 
   describe("deposits", async function () {
-    let compAPY, aaveAPY;
-    let results;
+    let deposit;
     let depositEvent
 
     beforeEach(async function () {
@@ -62,7 +61,7 @@ describe("Aggregator", function () {
       aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
       await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
       // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
-      results = await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+      deposit = await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
     });
 
     it("tracks WETH balance", async function () {
@@ -76,42 +75,53 @@ describe("Aggregator", function () {
     });
 
     it('emits deposit event', async () => {
-      const receipt = await results.wait();
+      const receipt = await deposit.wait();
 
       if(receipt.events && receipt.events.length > 0){
         depositEvent = receipt.events.find(e => e.event === 'Deposit');
-        console.log(depositEvent.event);
       } else {
         console.log('No events were emitted');
       }
       expect(depositEvent.event).to.equal('Deposit');
     })
 
-
-    it('fails when transfer is not approved', async () => {
+    it('FAILS when transfer is not approved', async () => {
       await expect(aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100))).to.be.reverted;
     })
         
   });
 
-  // describe('withdraws', async () => {
-  //   let compAPY, aaveAPY;
-  //   let results;
-  //   let withdrawEvent
+  describe('withdraws', async () => {
+    let withdraw;
 
-  //   beforeEach(async function () {
-  //     compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
-  //     aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
-  //     await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
-  //     // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
-  //     results = await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
-  //     await aggregator.withdraw(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
-  //   });
+    beforeEach(async function () {
+      compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
+      aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
+      await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
+      // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
+      await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+      withdraw = await aggregator.withdraw();
+    });
 
-  //   it('emits withdraw event', async () => {
-  //     const receipt = await results.wait();
+    it('emits withdraw event', async () => {
+      const receipt = await withdraw.wait();
+      if(receipt.events && receipt.events.length > 0){
+        withdrawEvent = receipt.events.find(e => e.event === 'Withdraw');
+        expect(withdrawEvent.event).to.equal('Withdraw');
+      } else {
+        console.log('No events were emitted');
+      }
+    });
 
-  //     if(receipt.events && receipt.events.length > 0){
-  // ;
+    it('updates the user contract balance', async () => {
+      depositAmount = await aggregator.depositAmount()
+      expect(depositAmount.toString()).to.equal('0');
+    })
+
+    it('FAILS if another user attempts to withdraw', async () => {
+      await expect(aggregator.connect(user).withdraw()).to.be.reverted;
+    });
+
+  });
 
 });

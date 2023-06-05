@@ -52,10 +52,10 @@ contract Aggregator is Ownable {
             // // Update location track funds
             // locationOfFunds = address(weth);
 
-            console.log("deposit comp");
+            // console.log("deposit comp");
         } else {
             _depositToAave(_amount);
-            console.log("deposit aave");
+            // console.log("deposit aave");
         }
 
         emit Deposit(msg.sender, _amount, locationOfFunds);
@@ -81,7 +81,38 @@ contract Aggregator is Ownable {
         locationOfFunds = address(comet);
     }
 
-    //===================== Getter Functions =====================
+    function withdraw() external onlyOwner returns (uint256) {
+        require(depositAmount > 0);
+        uint256 amount;
+
+        if (locationOfFunds == address(comet)) {
+            amount = _withdrawFromCompound();
+            weth.transfer(msg.sender, amount);
+            locationOfFunds = msg.sender;
+        } else {
+            amount = _withdrawFromAave();
+            weth.transfer(msg.sender, amount);
+            locationOfFunds = msg.sender;
+        }
+
+        emit Withdraw(msg.sender, depositAmount, locationOfFunds);
+        depositAmount = 0;
+        return amount;
+    }
+
+    function _withdrawFromCompound() private returns (uint256) {
+        comet.withdraw(address(weth), comet.balanceOf(address(this)));
+        return weth.balanceOf(address(this));
+    }
+
+    function _withdrawFromAave() private returns (uint256) {
+        IPool aavePool = _getAavePool();
+        aaveAweth.approve(address(aavePool), type(uint).max);
+        aavePool.withdraw(address(weth), type(uint).max, address(this));
+        return weth.balanceOf(address(this));
+    }
+
+    // ===================== Getter Functions =====================
 
     function whereBalance() public view returns (address) {
         return locationOfFunds;
