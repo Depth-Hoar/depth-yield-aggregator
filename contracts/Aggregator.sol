@@ -19,9 +19,16 @@ contract Aggregator is Ownable {
     address public immutable AaaveWETH_Address =
         0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8;
 
+    address public locationOfFunds; // Keep track of where your balance is
+    uint256 public depositAmount;
+
     IERC20 immutable weth;
     IERC20 immutable aaveAweth;
     IComet immutable comet;
+
+    event Deposit(address owner, uint256 amount, address depositTo);
+    event Withdraw(address owner, uint256 amount, address withdrawFrom);
+    event Rebalance(address owner, uint256 amount, address depositTo);
 
     constructor() Ownable() {
         weth = IERC20(WETH_Address);
@@ -36,6 +43,9 @@ contract Aggregator is Ownable {
     ) external onlyOwner {
         require(_amount > 0);
 
+        weth.transferFrom(msg.sender, address(this), _amount);
+        depositAmount = depositAmount + _amount;
+
         if (_compAPY > _aaveAPY) {
             _depositToCompound(_amount);
 
@@ -47,6 +57,8 @@ contract Aggregator is Ownable {
             _depositToAave(_amount);
             console.log("deposit aave");
         }
+
+        emit Deposit(msg.sender, _amount, locationOfFunds);
     }
 
     function _getAavePool() private view returns (IPool) {
@@ -59,12 +71,19 @@ contract Aggregator is Ownable {
     function _depositToAave(uint256 weth_amount) private {
         IPool aavePool = _getAavePool();
         weth.approve(address(aavePool), weth_amount);
-        console.log(address(aavePool));
         aavePool.supply(address(weth), weth_amount, address(this), 0);
+        locationOfFunds = address(aavePool);
     }
 
     function _depositToCompound(uint256 weth_amount) private {
         weth.approve(address(comet), weth_amount);
         comet.supply(address(weth), weth_amount);
+        locationOfFunds = address(comet);
+    }
+
+    //===================== Getter Functions =====================
+
+    function whereBalance() public view returns (address) {
+        return locationOfFunds;
     }
 }

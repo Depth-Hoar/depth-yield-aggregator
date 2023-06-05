@@ -27,13 +27,13 @@ describe("Aggregator", function () {
   });
 
   it("gets WETH", async function () {
-    const amount = ethers.utils.parseEther('20');
+    const amount = ethers.utils.parseEther('50');
     await owner.sendTransaction({
       to: WETH.address,
       value: amount
     });
     const WETH_Balance = await WETH.balanceOf(owner.address)
-    expect(WETH_Balance.toString()).to.equal(ethers.utils.parseEther('20'));
+    expect(WETH_Balance.toString()).to.equal(ethers.utils.parseEther('50'));
   });
 
   describe('APY rates', async () => {
@@ -53,34 +53,65 @@ describe("Aggregator", function () {
   });
 
   describe("deposits", async function () {
-    // let amountInWei = utils.parseEther(amount.toString());
     let compAPY, aaveAPY;
-    let result;
+    let results;
+    let depositEvent
 
-      beforeEach(async function () {
-        compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
-        aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
-        await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
-        await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
-        await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
-        let balance = await WETH.balanceOf(owner.address);
-        balance = ethers.utils.formatEther(balance);
-        console.log(`Owner's WETH Balance: ${balance}`);
-      });
+    beforeEach(async function () {
+      compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
+      aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
+      await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
+      // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
+      results = await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+    });
 
-      it("deposit to aave", async function () {
+    it("tracks WETH balance", async function () {
+      balance = await aggregator.depositAmount()
+      expect(balance.toString()).to.equal(ethers.utils.parseEther('10'));
+    });
+
+    it("tracks where WETH is deposited", async function () {
+      depositedTo = await aggregator.whereBalance()
+      console.log('your WETH went here:', depositedTo)
+    });
+
+    it('emits deposit event', async () => {
+      const receipt = await results.wait();
+
+      if(receipt.events && receipt.events.length > 0){
+        depositEvent = receipt.events.find(e => e.event === 'Deposit');
+        console.log(depositEvent.event);
+      } else {
+        console.log('No events were emitted');
+      }
+      expect(depositEvent.event).to.equal('Deposit');
+    })
 
 
-
-        // tx = await aggregator._deposit_to_aave(ethers.utils.parseEther('10'));
-        // console.log(tx);
-        // console.log(WETH)
-        
-
-      });
-
-
+    it('fails when transfer is not approved', async () => {
+      await expect(aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100))).to.be.reverted;
+    })
         
   });
+
+  // describe('withdraws', async () => {
+  //   let compAPY, aaveAPY;
+  //   let results;
+  //   let withdrawEvent
+
+  //   beforeEach(async function () {
+  //     compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
+  //     aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract)
+  //     await WETH.approve(aggregator.address, ethers.utils.parseEther('10'));
+  //     // await WETH.transfer(aggregator.address, ethers.utils.parseEther('10'));
+  //     results = await aggregator.deposit(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+  //     await aggregator.withdraw(ethers.utils.parseEther('10'), Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+  //   });
+
+  //   it('emits withdraw event', async () => {
+  //     const receipt = await results.wait();
+
+  //     if(receipt.events && receipt.events.length > 0){
+  // ;
 
 });
