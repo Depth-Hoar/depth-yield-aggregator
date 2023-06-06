@@ -32,3 +32,4 @@ function showError(error) {
 }
 
 export { getBlockchain, showError };
+export default getBlockchain;
