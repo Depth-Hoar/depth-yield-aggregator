@@ -4,7 +4,7 @@ const { abi: IERC20_ABI } = require("@openzeppelin/contracts/build/contracts/IER
 
 const cometABI = require('../ABIs/cometABI.json');
 const aaveV3PoolABI = require('../ABIs/aaveV3PoolABI.json');
-const getAPY = require('../helpers/getAPY.js');
+const getAPY = require('../frontend/src/helpers/getAPY.js');
 
 const WETH_Address = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 const cWETHv3 = '0xA17581A9E3356d9A858b789D68B4d866e593aE94';

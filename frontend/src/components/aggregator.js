@@ -2,13 +2,20 @@ import { showError } from '../utils/common'
 import { Button, Box, Typography, TextField, Grid } from "@mui/material";
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
+import getAPY from '../helpers/getAPY.js';
+import aaveV3PoolABI from '../ABIs/aaveV3poolABI.json';
+import cometABI from '../ABIs/cometABI.json';
+
 
 const { abi: IERC20_ABI } = require("@openzeppelin/contracts/build/contracts/IERC20.json");
-
+// const getAPY = require('../helpers/getAPY.js');
+// const { aaveV3PoolABI } = require('../ABIs/aaveV3poolABI.json');
 
 function Aggregator({ blockchain }) {
 
   const WETH_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+  const aaveV3Pool = '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2';
+  const cWETHv3 = '0xA17581A9E3356d9A858b789D68B4d866e593aE94';
   const WETH_ABI = IERC20_ABI;
   const [show, setShow] = useState(false);
   const [whereBalance, setWhereBalance] = useState();
@@ -16,6 +23,8 @@ function Aggregator({ blockchain }) {
   const [WETHBalance, setWETHBalance] = useState();
   const [depositBalance, setDepositBalance] = useState('');
   const [WETHContract, setWETHContract] = useState(null);
+  const [compAPY, setCompAPY] = useState();
+const [aaveAPY, setAaveAPY] = useState();
 
   useEffect(() => {
     (async () => {
@@ -26,10 +35,18 @@ function Aggregator({ blockchain }) {
       const signer = provider.getSigner();
       const WETHInstance = new ethers.Contract(WETH_ADDRESS, WETH_ABI, signer);
       const balance = await WETHInstance.balanceOf(blockchain.signerAddress);
+      const cWETHv3_Contract = new ethers.Contract(cWETHv3, cometABI.abi, signer);
+      const aaveV3Pool_contract = new ethers.Contract(aaveV3Pool, aaveV3PoolABI, signer);
       setWETHBalance(ethers.utils.formatEther(balance));
       setDepositBalance(ethers.utils.formatEther(await blockchain.aggregator.connect(signer).depositBalance()));
       setWhereBalance(await blockchain.aggregator.whereBalance());
       setWETHContract(WETHInstance);
+      // APY
+      const compAPY = await getAPY.getCompoundAPY(cWETHv3_Contract);
+      const aaveAPY = await getAPY.getAaveAPY(aaveV3Pool_contract);
+      setCompAPY(compAPY);
+      setAaveAPY(aaveAPY);
+
     })();
   },[blockchain, WETH_ABI]);
   
@@ -49,7 +66,7 @@ function Aggregator({ blockchain }) {
         await approveTx.wait();
 
         // Then call the deposit function in the aggregator
-        const depositTx = await blockchain.aggregator.connect(WETHContract.signer).deposit(parsedDepositAmount,100000,300000);
+        const depositTx = await blockchain.aggregator.connect(WETHContract.signer).deposit(parsedDepositAmount, Math.round(compAPY * 100), Math.round(aaveAPY * 100));
         await depositTx.wait();
       } 
       catch (error) {
@@ -112,6 +129,12 @@ function Aggregator({ blockchain }) {
           </Typography>
           <Typography>
                 Amount Deposited to Aggregator: {depositBalance}: 
+          </Typography>
+          <Typography>
+                Compound APY: {compAPY}: 
+          </Typography>
+          <Typography>
+                Aave APY: {aaveAPY} 
           </Typography>
         </Box>
     </Grid>
