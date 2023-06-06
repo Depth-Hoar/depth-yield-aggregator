@@ -61,11 +61,11 @@ const [aaveAPY, setAaveAPY] = useState();
     if (window.ethereum) {
       try {
         const parsedDepositAmount = ethers.utils.parseUnits(depositAmount, 'ether');
-        // First, approve the aggregator to spend WETH on user's behalf
+        // approve the aggregator to spend WETH on user's behalf
         const approveTx = await WETHContract.approve(blockchain.aggregator.address, parsedDepositAmount);
         await approveTx.wait();
 
-        // Then call the deposit function in the aggregator
+        // call the deposit function in the aggregator
         const depositTx = await blockchain.aggregator.connect(WETHContract.signer).deposit(parsedDepositAmount, Math.round(compAPY * 100), Math.round(aaveAPY * 100));
         await depositTx.wait();
       } 
@@ -74,6 +74,28 @@ const [aaveAPY, setAaveAPY] = useState();
       }
       handleClose();
   }};
+
+  const withdrawFromAggregator = async () => {
+    try {
+      // Call the withdraw function from the Aggregator contract
+      const withdrawTx = await blockchain.aggregator.connect(WETHContract.signer).withdraw();
+      await withdrawTx.wait();
+    } 
+    catch (error) {
+      showError(error);
+    }
+  };
+  
+  const rebalanceAggregator = async () => {
+    try {
+      // Call the rebalance function from the Aggregator contract
+      const rebalanceTx = await blockchain.aggregator.connect(WETHContract.signer).rebalance(Math.round(compAPY * 100), Math.round(aaveAPY * 100));
+      await rebalanceTx.wait();
+    } 
+    catch (error) {
+      showError(error);
+    }
+  };
 
   return (
     <div >
@@ -107,7 +129,7 @@ const [aaveAPY, setAaveAPY] = useState();
 
       <Grid item>
         <Button 
-          type='submit'
+          onClick={withdrawFromAggregator}
           variant='contained'>
           Withdraw
         </Button>
@@ -116,6 +138,7 @@ const [aaveAPY, setAaveAPY] = useState();
       <Grid item>
         <Button 
           type='submit'
+          onClick={rebalanceAggregator}
           variant='contained'>
           Rebalance
         </Button>
