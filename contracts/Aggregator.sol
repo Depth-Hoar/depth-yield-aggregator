@@ -135,4 +135,8 @@ contract Aggregator is Ownable {
     function whereBalance() public view returns (address) {
         return locationOfFunds;
     }
+
+    function depositBalance() public view returns (uint256) {
+        return depositAmount;
+    }
 }
