@@ -8,8 +8,6 @@ import cometABI from '../ABIs/cometABI.json';
 
 
 const { abi: IERC20_ABI } = require("@openzeppelin/contracts/build/contracts/IERC20.json");
-// const getAPY = require('../helpers/getAPY.js');
-// const { aaveV3PoolABI } = require('../ABIs/aaveV3poolABI.json');
 
 function Aggregator({ blockchain }) {
 
@@ -24,7 +22,7 @@ function Aggregator({ blockchain }) {
   const [depositBalance, setDepositBalance] = useState('');
   const [WETHContract, setWETHContract] = useState(null);
   const [compAPY, setCompAPY] = useState();
-const [aaveAPY, setAaveAPY] = useState();
+  const [aaveAPY, setAaveAPY] = useState();
 
   useEffect(() => {
     (async () => {
