@@ -1,13 +1,34 @@
-# Sample Hardhat Project
+# Yield Aggregator
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This project uses CompoundV3 and AaveV3 to get the best yields of the two. Deposit WETH into this DAPP and get get the better APY you can deposit withdraw and rebalance.
 
-Try running some of the following tasks:
+1. The frontend is built using `create-react-app` To start the frontend run
 
 ```shell
-npx hardhat help
+cd frontend, npm install, npm start
+```
+
+2. Start a [local node](https://hardhat.org/getting-started/#connecting-a-wallet-or-dapp-to-hardhat-network)
+   Hardhat is a blockchain development toolkit used to compile your solidity files, run tests and run a local blockchain node. Open a new terminal and start the node.
+
+```shell
+npm install, npx hardhat node
+```
+
+3. Open a new terminal and deploy the smart contract in the `localhost` network
+
+```shell
+npx hardhat run --network localhost scripts/deploy.js
+```
+
+4. Get WETH in your wallet. Running this script will turn 100 ETH to 100 WETH
+
+```shell
+npx hardhat run --network localhost scripts/getWETH.js
+```
+
+run tests
+
+```shell
 npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
 ```

@@ -46,9 +46,9 @@ const NavBar = ({ blockchain }) => {
     }
   };
   
-  useEffect(() => {
-    connectHandler();
-  })
+  // useEffect(() => {
+  //   connectHandler();
+  // })
   
   return (
 <Box sx={{ flexGrow: 1 }}>
