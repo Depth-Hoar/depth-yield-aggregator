@@ -8,7 +8,7 @@ const getAPY = require('../frontend/src/helpers/getAPY.js');
 
 const WETH_Address = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
 const cWETHv3 = '0xA17581A9E3356d9A858b789D68B4d866e593aE94';
-const aaveV3Pool = '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2'; // I think this is right
+const aaveV3Pool = '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2';
 
 describe("Aggregator", function () {
   let WETH;

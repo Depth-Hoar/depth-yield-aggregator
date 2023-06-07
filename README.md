@@ -8,20 +8,22 @@ This project uses CompoundV3 and AaveV3 to get the best yields of the two. Depos
 cd frontend, npm install, npm start
 ```
 
-2. Start a [local node](https://hardhat.org/getting-started/#connecting-a-wallet-or-dapp-to-hardhat-network)
+2. Create a `.env` file use `example.env` template to make it. You will also need to get an Alchemy API key and add that to the ENV file.
+
+3. Start a [local node](https://hardhat.org/getting-started/#connecting-a-wallet-or-dapp-to-hardhat-network)
    Hardhat is a blockchain development toolkit used to compile your solidity files, run tests and run a local blockchain node. Open a new terminal and start the node.
 
 ```shell
 npm install, npx hardhat node
 ```
 
-3. Open a new terminal and deploy the smart contract in the `localhost` network
+4. Open a new terminal and deploy the smart contract in the `localhost` network
 
 ```shell
 npx hardhat run --network localhost scripts/deploy.js
 ```
 
-4. Get WETH in your wallet. Running this script will turn 100 ETH to 100 WETH
+5. Get WETH in your wallet. Running this script will turn 100 ETH to 100 WETH
 
 ```shell
 npx hardhat run --network localhost scripts/getWETH.js

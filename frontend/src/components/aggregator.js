@@ -97,71 +97,71 @@ function Aggregator({ blockchain }) {
 
   return (
     <div >
-    <Box sx={{p:10}}>
-    <Grid
-      container
-      direction="column"
-      justifyContent="center"
-      alignItems="center"
-      spacing={2}
-    >
-      <form noValidate autoComplete='off' onSubmit={depositToAggregator}>
-      <Grid item>
-        <TextField 
-          onChange={(e) => setDepositAmount(e.target.value)}
-          sx={{ m: 1, width: '42ch' }}
-          id="outlined-basic" 
-          label="Deposit Amount" 
-          variant="outlined"
-          required
-        />
+      <Box sx={{p:10}}>
+        <Grid
+          container
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          spacing={2}
+        >
+          <form noValidate autoComplete='off' onSubmit={depositToAggregator}>
+          <Grid item>
+            <TextField 
+              onChange={(e) => setDepositAmount(e.target.value)}
+              sx={{ m: 1, width: '42ch' }}
+              id="outlined-basic" 
+              label="Deposit Amount" 
+              variant="outlined"
+              required
+            />
+            </Grid>
+            <Grid item>
+              <Button 
+                type='submit'
+                variant='contained'>
+                Deposit
+              </Button>
+            </Grid>
+          </form>
+
+          <Grid item>
+            <Button 
+              onClick={withdrawFromAggregator}
+              variant='contained'>
+              Withdraw
+            </Button>
+          </Grid>
+
+          <Grid item>
+            <Button 
+              type='submit'
+              onClick={rebalanceAggregator}
+              variant='contained'>
+              Rebalance
+            </Button>
+          </Grid>
+
+          <Box sx={{ padding: 5 }}>
+              <Typography>
+                    Active Protocol: {whereBalance}
+                </Typography>
+              <Typography>
+                    WETH  Balance: {WETHBalance}: 
+              </Typography>
+              <Typography>
+                    Amount Deposited to Aggregator: {depositBalance}: 
+              </Typography>
+              <Typography>
+                    Compound APY: {compAPY}: 
+              </Typography>
+              <Typography>
+                    Aave APY: {aaveAPY} 
+              </Typography>
+            </Box>
+            
         </Grid>
-        <Grid item>
-        <Button 
-          type='submit'
-          variant='contained'>
-          Deposit
-        </Button>
-        </Grid>
-      </form>
-
-      <Grid item>
-        <Button 
-          onClick={withdrawFromAggregator}
-          variant='contained'>
-          Withdraw
-        </Button>
-      </Grid>
-
-      <Grid item>
-        <Button 
-          type='submit'
-          onClick={rebalanceAggregator}
-          variant='contained'>
-          Rebalance
-        </Button>
-      </Grid>
-      <Box sx={{ padding: 5 }}>
-          <Typography>
-                Active Protocol: {whereBalance}
-            </Typography>
-          <Typography>
-                WETH  Balance: {WETHBalance}: 
-          </Typography>
-          <Typography>
-                Amount Deposited to Aggregator: {depositBalance}: 
-          </Typography>
-          <Typography>
-                Compound APY: {compAPY}: 
-          </Typography>
-          <Typography>
-                Aave APY: {aaveAPY} 
-          </Typography>
-        </Box>
-    </Grid>
-    </Box>
-    
-
+      </Box>
     </div>
   );
 }

@@ -1,14 +1,8 @@
-// import './navbar.css';
-import { AppBar, Toolbar, Button, Typography, Box, Select, MenuItem, Link } from '@mui/material'
-// import { getBlockchain, showError } from "./utils/common.js";
-// import { showError } from "../utils/common";
-// import { useNavigate } from 'react-router-dom';
+import { AppBar, Toolbar, Button, Typography, Box, Link } from '@mui/material'
 import { ethers } from "ethers";
-import React, { useEffect, useState } from "react";
-// import Blockies from 'react-blockies';
-// import config from '../config';
+import React, { useState } from "react";
 
-const NavBar = ({ blockchain }) => {
+const NavBar = () => {
 
   const [errorMessage, setErrorMessage] = useState(null);
   const [account, setAccount] = useState(null);
@@ -46,12 +40,8 @@ const NavBar = ({ blockchain }) => {
     }
   };
   
-  // useEffect(() => {
-  //   connectHandler();
-  // })
-  
   return (
-<Box sx={{ flexGrow: 1 }}>
+  <Box sx={{ flexGrow: 1 }}>
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6"
@@ -96,9 +86,7 @@ const NavBar = ({ blockchain }) => {
         </Typography>
       </Toolbar>
     </AppBar>
-    </Box>
-    
-
+  </Box>
   );
 };
 

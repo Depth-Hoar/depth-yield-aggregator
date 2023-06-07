@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { getBlockchain, showError } from './utils/common'
+import { getBlockchain } from './utils/common'
 import NavBar from "./components/navbar.js";
 import Aggregator from './components/aggregator';
 
