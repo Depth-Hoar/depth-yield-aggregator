@@ -9,7 +9,6 @@ import "hardhat/console.sol";
 import "./IComet.sol";
 
 contract Aggregator is Ownable {
-    // might have to use constant
     address public immutable AaveV3PoolAddressProvider =
         0x2f39d218133AFaB8F2B819B1066c7E434Ad94E9e;
     address public immutable WETH_Address =
@@ -92,7 +91,6 @@ contract Aggregator is Ownable {
             amount = _withdrawFromAave();
             weth.transfer(msg.sender, amount);
             locationOfFunds = msg.sender;
-            // console.log(amount, "amount");
         }
 
         emit Withdraw(msg.sender, depositAmount, locationOfFunds);

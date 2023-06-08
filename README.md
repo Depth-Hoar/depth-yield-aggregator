@@ -2,6 +2,10 @@
 
 This project uses CompoundV3 and AaveV3 to get the best yields of the two. Deposit WETH into this DAPP and get get the better APY you can deposit withdraw and rebalance.
 
+## Walk Through and Screencast Video
+
+[https://youtu.be/y_Cu5Ou7kvQ](https://youtu.be/y_Cu5Ou7kvQ)
+
 ## Technology Stack & Tools
 
 - Solidity (Writing Smart Contracts & Tests)
